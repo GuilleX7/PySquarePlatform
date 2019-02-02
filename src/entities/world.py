@@ -1,5 +1,4 @@
 import pygame
-import json
 import resManager
 from basic.sprite import Sprite
 
@@ -41,7 +40,7 @@ class WorldEntities:
 class WorldCamera:
     def __init__(self, root, freely=True):
         self.root = root
-        self.viewport = pygame.display.get_surface().get_size()
+        self.viewport = resManager.getVar("SIZE")
         self.half = (self.viewport[0] // 2, self.viewport[1] // 2)
         self.limit = (
             self.root.tilesize[0] * self.root.size[0] - self.viewport[0],

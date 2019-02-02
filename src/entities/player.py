@@ -2,7 +2,7 @@ import pygame
 from basic import axis
 
 class Player(pygame.Rect):
-    def __init__(self, world, pos=(0,0), color=(0, 0, 0), instantSpeed=(4, 10)):
+    def __init__(self, world, pos=[0,0], color=[0, 0, 0], instantSpeed=(4, 10)):
         pygame.Rect.__init__(self, pos, world.tilesize)
         self.root = world
         self.color = color

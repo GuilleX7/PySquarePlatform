@@ -17,15 +17,20 @@
 '''
 
 import pygame
-from states import mainState
+import states
 import resManager
+from states import mainstate
 
 def main():
-    SIZE, FPS = (720, 480), 60
+    #Global constants
+    resManager.setVar("SIZE", (720, 480))
+    resManager.setVar("FPS", 60)
+    resManager.setVar("TITLE", "PySquarePlatform")
+    resManager.setVar("MAPFILE", "map/initialLevel.json")
 
     pygame.init()
-    pygame.display.set_mode(SIZE)
-    pygame.display.set_caption("PySquarePlatform")
+    pygame.display.set_mode(resManager.getVar("SIZE"))
+    pygame.display.set_caption(resManager.getVar("TITLE"))
 
     icon = pygame.Surface((32, 32))
     icon.fill(pygame.Color(0, 0, 0))
@@ -34,8 +39,10 @@ def main():
     resManager.loadImgs([
         ("bg-default", "bg-default.png")
     ])
-    state = mainState.mainState()
+    
+    state = changeState(mainstate.mainState)
     clock = pygame.time.Clock()
+    FPS = resManager.getVar("FPS")
     finished = False
 
     while not finished:
@@ -45,11 +52,23 @@ def main():
             if e.type == pygame.QUIT:
               finished = True
 
-        state.update()
-        state.draw()
+        newStateClass = state.update()
+        if newStateClass == None:
+            state.draw()
+        else:
+            state = changeState(newStateClass)
+            
         clock.tick(FPS)
 
     pygame.quit()
+    
+def changeState(stateClass):
+    state = stateClass()
+    newState = state.create()
+    if newState != None:
+        return changeState(newState)
+    
+    return state
         
 if __name__ == '__main__':
     main()

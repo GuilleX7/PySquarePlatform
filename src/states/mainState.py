@@ -1,14 +1,21 @@
 import pygame
-import json
 import resManager
-from states.state import State
+from states import state, errorstate
 from entities import player, world
 
-class mainState(State):
-    def __init__(self):
+class mainState(state.State):
+    def create(self):
         self.ctx = pygame.display.get_surface()
 
-        data = resManager.loadData("map/initialLevel.json")
+        #To be changed
+        mapFile = resManager.getVar("MAPFILE")
+
+        request = resManager.loadJSONFile(mapFile)
+        if request[0] == resManager.DIE:
+            resManager.setVar("ERROR_INFO", "unable to load map file")
+            return errorstate.errorState
+        
+        data = request[1]
 
         self.world = world.World(
             data["world"]["map"], background=data["world"]["background"], gravity=data["world"]["gravity"]

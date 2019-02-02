@@ -2,8 +2,11 @@ class State:
     def __init__(self):
         pass
     
+    def create(self):
+        return None
+    
     def update(self):
-        pass
+        return None
 
     def draw(self):
         pass
