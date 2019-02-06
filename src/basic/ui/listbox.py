@@ -2,8 +2,6 @@
 
 import pygame
 import resManager
-from ctypes.test.test_pickling import name
-from cgitb import text
 
 class ListBox(pygame.Rect):
     def __init__(self, pos, width, maxVisibleItems=6, elementHeight=30, fontHeight=20, bgColor=(255, 255, 255)):
