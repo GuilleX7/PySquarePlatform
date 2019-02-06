@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 import pygame
 import resManager
 from basic.sprite import Sprite
@@ -43,8 +45,8 @@ class WorldCamera:
         self.viewport = resManager.getVar("SIZE")
         self.half = (self.viewport[0] // 2, self.viewport[1] // 2)
         self.limit = (
-            self.root.tilesize[0] * self.root.size[0] - self.viewport[0],
-            self.root.tilesize[1] * self.root.size[1] - self.viewport[1]
+            max(self.root.tilesize[0] * self.root.size[0] - self.viewport[0], 0),
+            max(self.root.tilesize[1] * self.root.size[1] - self.viewport[1], 0)
         )
 
         self.setAt([0, 0])

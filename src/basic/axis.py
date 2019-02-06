@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 isUpR = lambda a, b: a.y + a.height <= b.y
 isDownR = lambda a, b: a.y >= b.y + b.height
 isLeftR = lambda a, b: a.x + a.width <= b.x

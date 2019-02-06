@@ -1,9 +1,11 @@
+#-*- coding: utf-8 -*-
+
 import pygame
 import resManager
-from states import state, mainstate
+from states import state, loadstate
 from basic.text import Text
 
-class errorState(state.State):
+class ErrorState(state.State):
     def create(self):
         self.ctx = pygame.display.get_surface()
         self.ctx.fill((255,50,50))
@@ -24,7 +26,7 @@ class errorState(state.State):
     def update(self):
         if self.restart:
             resManager.setVar("ERROR_INFO", "")
-            return mainstate.mainState
+            return loadstate.LoadState
         
     def handle(self, e):
         if e.type == pygame.KEYDOWN:

@@ -1,6 +1,9 @@
+#-*- coding: utf-8 -*-
+
 import pygame
 import os
 import json
+import re
 
 if os.path.basename(os.getcwd()) == "src":
     folder = "../res/"
@@ -17,9 +20,19 @@ _res = {
 OK = 0
 DIE = 1
 
-#File path functions
+#File functions
 def getPath(uri):
     return folder + uri
+
+def listFiles(folder, extension=None):
+    path = getPath(folder)
+    if extension == None:
+        files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    else:
+        files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)) and
+                 re.fullmatch(r".+\.{}".format(extension), f)]
+        
+    return files
 
 #Image functions
 def loadImg(idx, uri):

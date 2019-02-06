@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 '''
     A py-videogame about Mario-like squares!
     Copyright (C) 2019  GuilleX7 (guillex7.github.io)
@@ -19,17 +21,17 @@
 import pygame
 import states
 import resManager
-from states import mainstate
+from states import loadstate
 
 def main():
     #Global constants
     resManager.setVar("SIZE", (720, 480))
     resManager.setVar("FPS", 60)
     resManager.setVar("TITLE", "PySquarePlatform")
-    resManager.setVar("MAPFILE", "map/initialLevel.json")
 
     pygame.init()
-    pygame.display.set_mode(resManager.getVar("SIZE"))
+    pygame.display.set_mode(resManager.getVar("SIZE"), pygame.DOUBLEBUF)
+    ctx = pygame.display.get_surface()
     pygame.display.set_caption(resManager.getVar("TITLE"))
 
     icon = pygame.Surface((32, 32))
@@ -40,7 +42,7 @@ def main():
         ("bg-default", "bg-default.png")
     ])
     
-    state = changeState(mainstate.mainState)
+    state = changeState(loadstate.LoadState)
     clock = pygame.time.Clock()
     FPS = resManager.getVar("FPS")
     finished = False
