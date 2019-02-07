@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-class Container():
+class Container:
     def __init__(self):
         self.components = dict()
         self.focusedOn = None

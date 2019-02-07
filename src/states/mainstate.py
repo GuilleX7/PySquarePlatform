@@ -18,17 +18,21 @@ class MainState(state.State):
         
         data = request[1]
 
-        self.world = world.World(
-            data["world"]["map"], background=data["world"]["background"], gravity=data["world"]["gravity"]
-        )
-        self.player = player.Player(
-            self.world,
-            data["player"]["position"], instantSpeed=(data["player"]["speed"], data["player"]["jumpspeed"])
-        )
-
-        self.world.create()
-        self.world.camera.setFreely(data["camera"]["freely"])
-        self.world.camera.track(self.player)
+        try:
+            self.world = world.World(
+                data["world"]["map"], data["world"]["background"], data["world"]["gravity"]
+            )
+            self.player = player.Player(
+                self.world,
+                data["player"]["position"], instantSpeed=(data["player"]["speed"], data["player"]["jumpspeed"])
+            )
+    
+            self.world.create()
+            self.world.camera.setFreely(data["camera"]["freely"])
+            self.world.camera.track(self.player)
+        except Exception:
+            resManager.setVar("ERROR_INFO", "invalid map file") #Oops, we've got trouble loading this
+            return errorstate.ErrorState
         
         self.quit = False
     

@@ -1,14 +1,16 @@
 #-*- coding: utf-8 -*-
 
 import pygame
+import resManager
 from basic import axis
 
 class Player(pygame.Rect):
-    def __init__(self, world, pos=[0,0], color=[0, 0, 0], instantSpeed=(4, 10)):
+    def __init__(self, world, pos=[0,0], instantSpeed=(4, 10), color=[0, 0, 0]):
         pygame.Rect.__init__(self, pos, world.tilesize)
         self.root = world
-        self.color = color
         self.instantSpeed = instantSpeed
+        self.color = color
+        
         self.maxSpeed = (0, 20)
         self.speed = [0, 0]
         self.state = {
@@ -30,8 +32,12 @@ class Player(pygame.Rect):
             self.speed[0] = 0
 
         if keys[pygame.K_UP] and self.state["jumping"] == self.state["falling"] == False:
-            self.state["jumping"] = True
-            self.speed[1] = -self.instantSpeed[1]
+            self.jump(self.instantSpeed[1])
+            
+    def jump(self, jumpSpeed):
+        self.state["jumping"] = True
+        self.speed[1] = -jumpSpeed
+        resManager.playSound("jump")
 
     def checkCollisions(self):
         ghost = self.move(self.speed[0], 0)
@@ -44,9 +50,13 @@ class Player(pygame.Rect):
             if axis.isLeftR(self, block):
                 axis.setLeftR(self, block)
                 self.speed[0] = 0
+                #Dispatch block event
+                block.onCollisionWithPlayer(self, "l")
             elif axis.isRightR(self, block):
                 axis.setRightR(self, block)
                 self.speed[0] = 0
+                #Dispatch block event
+                block.onCollisionWithPlayer(self, "r")
 
         ghost = self.move(0, self.speed[1])
         collision = ghost.collidelist(blocks)
@@ -65,12 +75,15 @@ class Player(pygame.Rect):
                 axis.setUpR(self, block)
                 self.speed[1] = self.root.gravity
                 self.state["falling"] = False
+                #Dispatch block event
+                block.onCollisionWithPlayer(self, "u")
             elif axis.isDownR(self, block):
                 axis.setDownR(self, block)
                 self.speed[1] = self.root.gravity
                 self.state["falling"] = True
                 self.state["jumping"] = False
-
+                #Dispatch block event
+                block.onCollisionWithPlayer(self, "d")
 
     def draw(self, ctx, offset=(0,0)):
         pygame.draw.rect(ctx, self.color, self.move(offset))

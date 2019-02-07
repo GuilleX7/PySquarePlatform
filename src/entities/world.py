@@ -21,23 +21,87 @@ class WorldTree:
         else:
             return self.root.entities.solids[loc]
 
-class WorldEntities:
-    class BLOCKID:
+class WorldBlockBase(pygame.Rect):    
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self._marked = False
+    
+    def draw(self, ctx, offset=(0, 0)):
+        pygame.draw.rect(ctx, self.color, self.move(offset))
+    
+    def onCollisionWithPlayer(self, player, collisionSide):
+        pass
+    
+    def remove(self):
+        self._marked = True
+    
+class WorldBlock:
+    #Constants
+    class Types:
         AIR = 0
         SOLID = 1
+        SOLID_JUMPY = 2
+        SOLID_BREAKY = 3
+        
+    #Block classes
+    class SOLID(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__(pos, size)
+            self.type = WorldBlock.Types.SOLID
+            self.color = (0, 200, 0)
+            
+    class SOLID_JUMPY(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__(pos, size)
+            self.type = WorldBlock.Types.SOLID_JUMPY
+            self.color = (255, 255, 0)
+            
+        def onCollisionWithPlayer(self, player, collisionSide):
+            if collisionSide == "u":
+                player.jump(player.instantSpeed[1] * 2)
+                
+    class SOLID_BREAKY(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__(pos, size)
+            self.type = WorldBlock.Types.SOLID_BREAKY
+            self.color = (100, 100, 100)
+            
+        def onCollisionWithPlayer(self, player, collisionSide):
+            if collisionSide == "u":
+                player.jump(player.instantSpeed[1] / 2)
+                resManager.playSound("break")
+                self.remove()
 
+class WorldEntities:
     def __init__(self, root):
         self.root = root
         self.solids = [[] for x in range(self.root.size[0])]
+        self.markeds = []
 
-    def createBlock(self, id, x, y):
-        if id == self.BLOCKID.SOLID:
-            self.solids[x].append(pygame.Rect((x * self.root.tilesize[0], y * self.root.tilesize[1]), self.root.tilesize))
+    def createBlock(self, type, x, y):
+        realPosition = (x * self.root.tilesize[0], y * self.root.tilesize[1])
+        if type == WorldBlock.Types.SOLID:
+            self.solids[x].append(WorldBlock.SOLID(realPosition, self.root.tilesize))
+        elif type == WorldBlock.Types.SOLID_JUMPY:
+            self.solids[x].append(WorldBlock.SOLID_JUMPY(realPosition, self.root.tilesize))
+        elif type == WorldBlock.Types.SOLID_BREAKY:
+            self.solids[x].append(WorldBlock.SOLID_BREAKY(realPosition, self.root.tilesize))
 
     def draw(self, ctx, offset=(0,0)):
-        for grid in self.solids:
-            for solid in grid:
-                pygame.draw.rect(ctx, (0, 255, 0), solid.move(offset))
+        for gridx, grid in enumerate(self.solids):
+            for idx, block in enumerate(grid):
+                if block._marked == True:
+                    self.markeds.append((gridx, idx)) #Mark
+                    pass
+                
+                block.draw(ctx, offset)
+                
+        self.sweep() #And sweep
+        
+    def sweep(self):
+        while len(self.markeds) > 0:
+            gridx, idx = self.markeds.pop()
+            self.solids[gridx].pop(idx) #Say goodbye :(
 
 class WorldCamera:
     def __init__(self, root, freely=True):
@@ -97,11 +161,11 @@ class WorldCamera:
                 self.pos[1] = self.limit[1]
 
 class World:
-    def __init__(self, map, tilesize=(30, 30), background="bg-default", gravity=0.5):
+    def __init__(self, map, background="bg-default", gravity=0.5, tilesize=(30, 30)):
         self.map = map
-        self.tilesize = tilesize
         self.background = Sprite(resManager.getImg(background), (0, 0))
         self.gravity = gravity
+        self.tilesize = tilesize
 
         self.size = (len(self.map[0]), len(self.map))
 
@@ -111,6 +175,9 @@ class World:
 
     def create(self):
         for y, line in enumerate(self.map):
+            if len(line) != self.size[0]: #Line width is not as map width!
+                raise Exception
+            
             for x, blockid in enumerate(line):
                 self.entities.createBlock(blockid, x, y)
 

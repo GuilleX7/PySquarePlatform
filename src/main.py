@@ -38,8 +38,15 @@ def main():
     icon.fill(pygame.Color(0, 0, 0))
     pygame.display.set_icon(icon)
 
+    #Load data here
     resManager.loadImgs([
-        ("bg-default", "bg-default.png")
+        ("bg-default", "img/bg-default.png")
+    ])
+    resManager.loadSounds([
+        ("jump", "sound/jump.ogg"),
+        ("break", "sound/break.ogg"),
+        ("listbox_move", "sound/listbox_move.ogg"),
+        ("listbox_signal", "sound/listbox_signal.ogg")
     ])
     
     state = changeState(loadstate.LoadState)

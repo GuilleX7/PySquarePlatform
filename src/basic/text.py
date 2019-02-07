@@ -3,7 +3,7 @@
 import pygame
 import resManager
 
-class Text():
+class Text:
 	def __init__(self, txt, font, pos=[0, 0], color=[0, 0, 0], antialias=False, bgColor=None):
 		self.txt = txt
 		self.font = font

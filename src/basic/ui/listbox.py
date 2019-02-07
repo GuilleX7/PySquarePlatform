@@ -90,12 +90,21 @@ class ListBox(pygame.Rect):
     
         self.setSelected((idx + delta) % self.length())
         self.updateOffset()
+        resManager.playSound("listbox_move")
         
     def updateOffset(self):
         self.offset = max(self.getSelected() + 1, self.maxVisibleItems) - self.maxVisibleItems
         
     def getVisibleItems(self):
         return self.items[self.offset:self.offset + self.maxVisibleItems]
+    
+    def pushSignal(self):
+        selected = self.getSelected()
+        if selected == None:
+            return
+        
+        self.signals.append(self.getByIdx(selected).name)
+        resManager.playSound("listbox_signal")
         
     def draw(self, ctx):
         ctx.fill(self.bgColor, self)
@@ -113,7 +122,7 @@ class ListBox(pygame.Rect):
         elif e.key == pygame.K_DOWN:
             self.moveSelected(1)
         elif e.key == pygame.K_RETURN:
-            self.signals.append(self.getByIdx(self.getSelected()).name)
+            self.pushSignal()
                 
 class ListBoxItem():
     def __init__(self, root, name, text, bgColor, focusColor, textColor):

@@ -2,6 +2,7 @@
 
 import pygame
 import resManager
+from os import path
 from states import state, mainstate
 from basic.ui import container, listbox
 from basic import sprite, text
@@ -25,9 +26,10 @@ class LoadState(state.State):
         pygame.key.set_repeat(300, 100)
         
     def refresh(self):
+        BASEPATH = "map"
         self.listbox.clear()
-        for file in resManager.listFiles("map", "json"):
-            self.listbox.addItem(resManager.getPath("map/" + file), file, bgColor=(200, 200, 200), focusColor=(255, 255, 255))
+        for file in resManager.listFiles(BASEPATH, "json"):
+            self.listbox.addItem(path.join(resManager.getPath(BASEPATH), file), file, bgColor=(200, 200, 200), focusColor=(255, 255, 255))
         
     def update(self):
         if self.listbox.peek():

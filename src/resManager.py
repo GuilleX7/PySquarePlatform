@@ -12,6 +12,7 @@ else:
 
 _res = {
     "img": dict(),
+    "sound": dict(),
     "font": dict(),
     "var": dict()
 }
@@ -39,12 +40,26 @@ def loadImg(idx, uri):
     _res["img"][idx] = pygame.image.load(getPath(uri))
     _res["img"][idx].convert() #Quicker drawing!
 
-def loadImgs(uris):
-    for idx, uri in uris:
+def loadImgs(data):
+    for idx, uri in data:
         loadImg(idx, uri)
 
-def getImg(id):
-    return _res["img"][id]
+def getImg(idx):
+    return _res["img"][idx]
+
+#Sound functions
+def loadSound(idx, uri):
+    _res["sound"][idx] = pygame.mixer.Sound(getPath(uri))
+    
+def loadSounds(data):
+    for idx, uri in data:
+        loadSound(idx, uri)
+
+def getSound(idx):
+    return _res["sound"][idx]
+
+def playSound(idx, loops=0, maxtime=0, fade_ms=0):
+    getSound(idx).play(loops, maxtime, fade_ms)
 
 #JSON File functions
 def loadJSONFile(uri):
@@ -80,4 +95,3 @@ def setVar(idx, value):
     
 def getVar(idx):
     return _res["var"].get(idx, None)
-    
