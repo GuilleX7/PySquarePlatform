@@ -4,6 +4,7 @@ import pygame
 import os
 import json
 import re
+from basic.animation import Animation
 
 if os.path.basename(os.getcwd()) == "src":
     folder = "../res/"
@@ -14,7 +15,8 @@ _res = {
     "img": dict(),
     "sound": dict(),
     "font": dict(),
-    "var": dict()
+    "var": dict(),
+    "anim": dict()
 }
 
 #Constants
@@ -95,3 +97,14 @@ def setVar(idx, value):
     
 def getVar(idx):
     return _res["var"].get(idx, None)
+
+#Synchronized animation functions
+def createSyncAnimation(idx, img, tw, th, ticksPerFrame=3, colorKey=None):
+    _res["anim"][idx] = Animation(img, tw, th, ticksPerFrame, colorKey)
+    
+def getSyncAnimation(idx):
+    return _res["anim"].get(idx, None)
+
+def updateSyncAnimations():
+    for anim in _res["anim"].values():
+        anim.update()

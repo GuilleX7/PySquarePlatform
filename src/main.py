@@ -40,14 +40,17 @@ def main():
 
     #Load data here
     resManager.loadImgs([
-        ("bg-default", "img/bg-default.png")
+        ("bg-default", "img/bg-default.png"),
+        ("coin", "img/coin.png")
     ])
     resManager.loadSounds([
         ("jump", "sound/jump.ogg"),
         ("break", "sound/break.ogg"),
+        #("coin", "sound/coin.ogg"),
         ("listbox_move", "sound/listbox_move.ogg"),
         ("listbox_signal", "sound/listbox_signal.ogg")
     ])
+    resManager.createSyncAnimation("coin", resManager.getImg("coin"), 20, 24, ticksPerFrame=5, colorKey=(255, 255, 255))
     
     state = changeState(loadstate.LoadState)
     clock = pygame.time.Clock()
@@ -61,6 +64,7 @@ def main():
             if e.type == pygame.QUIT:
               finished = True
 
+        resManager.updateSyncAnimations()
         newStateClass = state.update()
         if newStateClass == None:
             state.draw()

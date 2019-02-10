@@ -3,6 +3,7 @@
 import pygame
 import resManager
 from basic.sprite import Sprite
+from basic.animation import Animation
 
 class WorldTree:
     def __init__(self, root):
@@ -15,11 +16,11 @@ class WorldTree:
     def zone(self, rect):
         loc = self.locate(rect)
         if loc < -1 or loc > self.limitX:
-            return []
+            return tuple()
         elif loc != self.limitX:
-            return self.root.entities.solids[loc] + self.root.entities.solids[loc + 1]
+            return (loc, loc + 1)
         else:
-            return self.root.entities.solids[loc]
+            return (loc, )
 
 class WorldBlockBase(pygame.Rect):    
     def __init__(self, pos, size):
@@ -37,13 +38,20 @@ class WorldBlockBase(pygame.Rect):
     
 class WorldBlock:
     #Constants
+    class Groups:
+        SOLIDS = 0
+        SPECIALS = 1
+        _LEN = 2
+    
     class Types:
         AIR = 0
         SOLID = 1
         SOLID_JUMPY = 2
         SOLID_BREAKY = 3
+        SOLID_INVISIBLE = 4
+        SPECIAL_COIN = 9
         
-    #Block classes
+    #SOLID classes
     class SOLID(WorldBlockBase):
         def __init__(self, pos, size):
             super().__init__(pos, size)
@@ -71,37 +79,97 @@ class WorldBlock:
                 player.jump(player.instantSpeed[1] / 2)
                 resManager.playSound("break")
                 self.remove()
-
+            elif collisionSide == "d":
+                resManager.playSound("break")
+                self.remove()
+                
+    class SOLID_INVISIBLE(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__(pos, size)
+            self.type = WorldBlock.Types.SOLID_INVISIBLE
+            self.color = (100, 0, 100)
+            self.visible = False
+            
+        def onCollisionWithPlayer(self, player, collisionSide):
+            if collisionSide == "d":
+                self.visible = True
+            
+        def draw(self, ctx, offset=(0, 0)):
+            if self.visible:
+                WorldBlockBase.draw(self, ctx, offset=offset)
+ 
+    #SPECIAL classes
+    class SPECIAL_COIN(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__((pos[0] + 5, pos[1] + 3), (size[0] - 10, size[1] - 6))
+            self.type = WorldBlock.Types.SPECIAL_COIN
+            
+        def onCollisionWithPlayer(self, player, collisionSide):
+            player.score += 1
+            #resManager.playSound("coin") #Disabled because it sounds really bad... looking for a fix :(
+            self.remove()
+                
+        def draw(self, ctx, offset=(0, 0)):
+            ctx.blit(resManager.getSyncAnimation("coin").getSurface(), self.move(offset))
+            
+ 
 class WorldEntities:
     def __init__(self, root):
         self.root = root
-        self.solids = [[] for x in range(self.root.size[0])]
-        self.markeds = []
+        self.groups = [self.initWorldArray() for i in range(WorldBlock.Groups._LEN)]
+        
+    def initWorldArray(self):
+        return [[] for x in range(self.root.size[0])]
+    
+    def getGroupByZones(self, group, zones):
+        result = []
+        for zone in zones:
+            result += self.groups[group][zone]
+        return result
+    
+    def getAllGroup(self, group):
+        return [block
+                for block in grid
+                for grid in self.groups[group]]
+    
+    def getAll(self):
+        return [block
+                for block in grid
+                for grid in group
+                for group in self.groups]
 
     def createBlock(self, type, x, y):
         realPosition = (x * self.root.tilesize[0], y * self.root.tilesize[1])
+        #SOLIDS
         if type == WorldBlock.Types.SOLID:
-            self.solids[x].append(WorldBlock.SOLID(realPosition, self.root.tilesize))
+            self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID(realPosition, self.root.tilesize))
         elif type == WorldBlock.Types.SOLID_JUMPY:
-            self.solids[x].append(WorldBlock.SOLID_JUMPY(realPosition, self.root.tilesize))
+            self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_JUMPY(realPosition, self.root.tilesize))
         elif type == WorldBlock.Types.SOLID_BREAKY:
-            self.solids[x].append(WorldBlock.SOLID_BREAKY(realPosition, self.root.tilesize))
+            self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_BREAKY(realPosition, self.root.tilesize))
+        elif type == WorldBlock.Types.SOLID_INVISIBLE:
+            self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_INVISIBLE(realPosition, self.root.tilesize))
+        #SPECIALS
+        elif type == WorldBlock.Types.SPECIAL_COIN:
+            self.groups[WorldBlock.Groups.SPECIALS][x].append(WorldBlock.SPECIAL_COIN(realPosition, self.root.tilesize))
 
-    def draw(self, ctx, offset=(0,0)):
-        for gridx, grid in enumerate(self.solids):
-            for idx, block in enumerate(grid):
-                if block._marked == True:
-                    self.markeds.append((gridx, idx)) #Mark
-                    pass
-                
-                block.draw(ctx, offset)
-                
-        self.sweep() #And sweep
+    def updateAndDraw(self, ctx, offset=(0,0)):
+        for group in self.groups:
+            markeds = []
+            for gridx, grid in enumerate(group):
+                for idx, block in enumerate(grid):
+                    if block._marked == True:
+                        markeds.append((gridx, idx))
+                        pass
+                    
+                    block.draw(ctx, offset)
+                    
+            self.sweep(markeds, group)
         
-    def sweep(self):
-        while len(self.markeds) > 0:
-            gridx, idx = self.markeds.pop()
-            self.solids[gridx].pop(idx) #Say goodbye :(
+    def sweep(self, markeds, group):
+        while len(markeds) > 0:
+            gridx, idx = markeds.pop()
+            group[gridx].pop(idx) #Say goodbye :(
 
 class WorldCamera:
     def __init__(self, root, freely=True):
@@ -183,4 +251,4 @@ class World:
 
     def draw(self, ctx, offset=(0,0)):
         self.background.draw(ctx)
-        self.entities.draw(ctx, offset)
+        self.entities.updateAndDraw(ctx, offset)

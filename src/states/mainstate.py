@@ -26,7 +26,7 @@ class MainState(state.State):
                 self.world,
                 data["player"]["position"], instantSpeed=(data["player"]["speed"], data["player"]["jumpspeed"])
             )
-    
+            
             self.world.create()
             self.world.camera.setFreely(data["camera"]["freely"])
             self.world.camera.track(self.player)
