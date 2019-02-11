@@ -21,18 +21,20 @@
 import pygame
 import states
 import resManager
-from states import loadstate
+from states import menustate
 
 def main():
     #Global constants
     resManager.setVar("SIZE", (720, 480))
     resManager.setVar("FPS", 60)
     resManager.setVar("TITLE", "PySquarePlatform")
+    resManager.setVar("SOUND", True)
 
     pygame.init()
     pygame.display.set_mode(resManager.getVar("SIZE"), pygame.DOUBLEBUF)
     ctx = pygame.display.get_surface()
     pygame.display.set_caption(resManager.getVar("TITLE"))
+    pygame.mixer.set_num_channels(64)
 
     icon = pygame.Surface((32, 32))
     icon.fill(pygame.Color(0, 0, 0))
@@ -46,13 +48,13 @@ def main():
     resManager.loadSounds([
         ("jump", "sound/jump.ogg"),
         ("break", "sound/break.ogg"),
-        #("coin", "sound/coin.ogg"),
         ("listbox_move", "sound/listbox_move.ogg"),
         ("listbox_signal", "sound/listbox_signal.ogg")
     ])
     resManager.createSyncAnimation("coin", resManager.getImg("coin"), 20, 24, ticksPerFrame=5, colorKey=(255, 255, 255))
     
-    state = changeState(loadstate.LoadState)
+    state = changeState(menustate.MenuState)
+    
     clock = pygame.time.Clock()
     FPS = resManager.getVar("FPS")
     finished = False
@@ -69,6 +71,7 @@ def main():
         if newStateClass == None:
             state.draw()
         else:
+            state.destroy()
             state = changeState(newStateClass)
             
         clock.tick(FPS)
@@ -79,6 +82,7 @@ def changeState(stateClass):
     state = stateClass()
     newState = state.create()
     if newState != None:
+        state.destroy()
         return changeState(newState)
     
     return state

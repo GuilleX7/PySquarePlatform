@@ -61,7 +61,8 @@ def getSound(idx):
     return _res["sound"][idx]
 
 def playSound(idx, loops=0, maxtime=0, fade_ms=0):
-    getSound(idx).play(loops, maxtime, fade_ms)
+    if getVar("SOUND") == True:
+        getSound(idx).play(loops, maxtime, fade_ms)
 
 #JSON File functions
 def loadJSONFile(uri):

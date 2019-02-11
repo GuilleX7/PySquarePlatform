@@ -106,7 +106,6 @@ class WorldBlock:
             
         def onCollisionWithPlayer(self, player, collisionSide):
             player.score += 1
-            #resManager.playSound("coin") #Disabled because it sounds really bad... looking for a fix :(
             self.remove()
                 
         def draw(self, ctx, offset=(0, 0)):

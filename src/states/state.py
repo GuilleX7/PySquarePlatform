@@ -15,3 +15,6 @@ class State:
 
     def handle(self, e):
         pass
+    
+    def destroy(self):
+        pass
