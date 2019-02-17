@@ -33,6 +33,9 @@ class WorldBlockBase(pygame.Rect):
     def onCollisionWithPlayer(self, player, collisionSide):
         pass
     
+    def onCollisionWithEnemy(self, enemy, collisionSide):
+        pass
+    
     def remove(self):
         self._marked = True
     
@@ -42,6 +45,10 @@ class WorldBlock:
         SOLIDS = 0
         SPECIALS = 1
         _LEN = 2
+        
+    class GroupContainers:
+        SOLIDS = (1, 2, 3, 4)
+        SPECIALS = (9,)
     
     class Types:
         AIR = 0
@@ -49,6 +56,7 @@ class WorldBlock:
         SOLID_JUMPY = 2
         SOLID_BREAKY = 3
         SOLID_INVISIBLE = 4
+        SOLID_GROUND_SPIKES = 5
         SPECIAL_COIN = 9
         
     #SOLID classes
@@ -68,6 +76,10 @@ class WorldBlock:
             if collisionSide == "u":
                 player.jump(player.instantSpeed[1] * 2)
                 
+        def onCollisionWithEnemy(self, enemy, collisionSide):
+            if collisionSide == "u":
+                enemy.jump()
+                
     class SOLID_BREAKY(WorldBlockBase):
         def __init__(self, pos, size):
             super().__init__(pos, size)
@@ -83,6 +95,12 @@ class WorldBlock:
                 resManager.playSound("break")
                 self.remove()
                 
+        def onCollisionWithEnemy(self, enemy, collisionSide):
+            if collisionSide == "u":
+                resManager.playSound("break")
+                self.remove()
+                enemy.jump()
+                
     class SOLID_INVISIBLE(WorldBlockBase):
         def __init__(self, pos, size):
             super().__init__(pos, size)
@@ -96,16 +114,39 @@ class WorldBlock:
             
         def draw(self, ctx, offset=(0, 0)):
             if self.visible:
-                WorldBlockBase.draw(self, ctx, offset=offset)
+                super().draw(self, ctx, offset=offset)
+                
+    class SOLID_GROUND_SPIKES(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__(
+                (pos[0], pos[1] + 17),
+                (size[0], size[1] - 17)
+            )
+            self.type = WorldBlock.Types.SOLID_GROUND_SPIKES
+            self.visible = False
+            
+        def onCollisionWithPlayer(self, player, collisionSide):
+            if collisionSide == "u":
+                player.takeDamage()
+                player.jump()
+                
+        def onCollisionWithEnemy(self, enemy, collisionSide):
+            if collisionSide == "u":
+                enemy.remove()
+            
+        def draw(self, ctx, offset=(0, 0)):
+            ctx.blit(resManager.getSurface("ground-spikes"), self.move(offset))
  
     #SPECIAL classes
     class SPECIAL_COIN(WorldBlockBase):
+        score = 1
+        
         def __init__(self, pos, size):
             super().__init__((pos[0] + 5, pos[1] + 3), (size[0] - 10, size[1] - 6))
             self.type = WorldBlock.Types.SPECIAL_COIN
             
         def onCollisionWithPlayer(self, player, collisionSide):
-            player.score += 1
+            player.giveScore(self.score)
             self.remove()
                 
         def draw(self, ctx, offset=(0, 0)):
@@ -148,6 +189,8 @@ class WorldEntities:
             self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_BREAKY(realPosition, self.root.tilesize))
         elif type == WorldBlock.Types.SOLID_INVISIBLE:
             self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_INVISIBLE(realPosition, self.root.tilesize))
+        elif type == WorldBlock.Types.SOLID_GROUND_SPIKES:
+            self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_GROUND_SPIKES(realPosition, self.root.tilesize))
         #SPECIALS
         elif type == WorldBlock.Types.SPECIAL_COIN:
             self.groups[WorldBlock.Groups.SPECIALS][x].append(WorldBlock.SPECIAL_COIN(realPosition, self.root.tilesize))
@@ -235,10 +278,15 @@ class World:
         self.tilesize = tilesize
 
         self.size = (len(self.map[0]), len(self.map))
+        self.realsize = (self.size[0] * self.tilesize[0], self.size[1] * self.tilesize[1])
+        self.rect = pygame.Rect((0, 0), self.realsize)
 
         self.entities = WorldEntities(self)
         self.tree = WorldTree(self)
         self.camera = WorldCamera(self)
+
+    def getBlockAt(self, pos):
+        return self.map[pos[0]][pos[1]]
 
     def create(self):
         for y, line in enumerate(self.map):

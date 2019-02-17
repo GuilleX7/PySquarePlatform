@@ -12,8 +12,7 @@ class Animation:
         self.frame = 0
         
         self.surface = pygame.Surface((tw, th))
-        if colorKey != None:
-            self.surface.set_colorkey(colorKey)
+        self.surface.set_colorkey(colorKey)
         self.surface.convert()
 
         self.srcSize = self.img.get_size()

@@ -4,25 +4,37 @@ import pygame
 import resManager
 from basic import axis
 from basic.text import Text
+from basic.sprite import Sprite
 from entities.world import WorldBlock
 
 class PlayerHUD:
     def __init__(self, root):
         self.root = root
-        self.scoreText = Text("SCORE: 0", resManager.loadSystemFont(None, 20), [10, 10])
+        self.coin = Sprite(resManager.getImg("hud-coin"), [10, 10], colorKey=(255, 255, 255))
+        self.scoreText = Text("SCORE: 0", resManager.loadSystemFont(None, 20), [30, 10])
+        self.heart = Sprite(resManager.getImg("hud-heart"), [10, 30], colorKey=(255, 255, 255))
+        self.lifeText = Text("x 0", resManager.loadSystemFont(None, 20), [30, 30])
         
     def draw(self, ctx):
-        self.scoreText.setText("SCORE: {0}".format(self.root.score))
+        self.scoreText.setText("x {0}".format(self.root.score))
+        self.lifeText.setText("x {0}".format(self.root.lifes))
+        
+        self.coin.draw(ctx)
         self.scoreText.draw(ctx)
+        self.heart.draw(ctx)
+        self.lifeText.draw(ctx)
 
 class Player(pygame.Rect):
-    def __init__(self, root, pos=[0,0], instantSpeed=(4, 10), color=[0, 0, 0]):
+    def __init__(self, root, pos=[0,0], instantSpeed=(4, 10), lifes=2, maxLifes=5, maxScore=50):
         pygame.Rect.__init__(self, pos, root.tilesize)
         self.root = root
         self.instantSpeed = instantSpeed
-        self.color = color
+        self.color = (0, 0, 0)
         
+        self.lifes = lifes
+        self.maxLifes = maxLifes
         self.score = 0
+        self.maxScore = maxScore
         self.hud = PlayerHUD(self)
         
         self.maxSpeed = (0, 20)
@@ -31,13 +43,43 @@ class Player(pygame.Rect):
             "jumping": False,
             "falling": False
         }
+        
+        self.died = False
+        
+        self.saveGhost()
+        
+    def giveScore(self, score):
+        self.score += score
+        if self.score >= self.maxScore:
+            self.giveLifes(self.score // self.maxScore)
+            self.score = self.score % self.maxScore
+        
+    def giveLifes(self, lifes):
+        self.lifes += lifes
+        if self.lifes > self.maxLifes:
+            self.lifes = self.maxLifes
+        
+    def takeDamage(self, damage=1):
+        self.lifes -= damage
+        if self.lifes <= 0:
+            self.die()
+        
+    def die(self):
+        self.died = True
+        self.lifes = 0
+
+    def hasDied(self):
+        return self.died
     
-    def update(self):
+    def saveGhost(self):
+        self.oldGhost = self.copy()
+    
+    def update(self):            
+        self.handlePlayerInput()
         self.handleMovement()
-        self.checkSolidCollisions()
         self.checkSpecialCollisions()
 
-    def handleMovement(self):
+    def handlePlayerInput(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.speed[0] = -self.instantSpeed[0]
@@ -49,12 +91,25 @@ class Player(pygame.Rect):
         if keys[pygame.K_UP] and self.state["jumping"] == self.state["falling"] == False:
             self.jump(self.instantSpeed[1])
             
-    def jump(self, jumpSpeed):
+    def jump(self, jumpSpeed=None):
+        if self.state["jumping"] == True:
+            return
+        
+        if jumpSpeed == None:
+            jumpSpeed = self.instantSpeed[1]
+        
         self.state["jumping"] = True
         self.speed[1] = -jumpSpeed
         resManager.playSound("jump")
 
-    def checkSolidCollisions(self):
+    def handleMovement(self):
+        #We'll use this "ghost" in order to know from which side we collided
+        self.saveGhost()
+        
+        #If we've fallen off the world, die instantly
+        if self.y >= self.root.realsize[1]:
+            self.die()
+        
         ghost = self.move(self.speed[0], 0)
         ghostZone = self.root.tree.zone(ghost)
         blocks = self.root.entities.getGroupByZones(WorldBlock.Groups.SOLIDS, ghostZone)

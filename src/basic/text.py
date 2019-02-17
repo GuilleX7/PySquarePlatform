@@ -50,14 +50,14 @@ class Text:
 	def getRect(self):
 		return pygame.Rect(pos, self.getSize())
 	
-	def center(self, horizontally=True, vertically=False):
+	def center(self, horizontally=True, vertically=False, xOffset=0, yOffset=0):
 		viewport = resManager.getVar("SIZE")
 		size = self.getSize()
 		newPos = self.pos
 		if horizontally:
-			newPos[0] = viewport[0] / 2 - size[0] / 2
+			newPos[0] = viewport[0] / 2 - size[0] / 2 + xOffset
 		if vertically:
-			newPos[1] = viewport[1] / 2 - size[1] / 2
+			newPos[1] = viewport[1] / 2 - size[1] / 2 + yOffset
 			
 		self.setPos(newPos)
 		

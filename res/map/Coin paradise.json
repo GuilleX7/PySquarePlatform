@@ -23,10 +23,14 @@
     ]
   },
   "player": {
-    "position": [200, 450],
+    "position": [2, 4],
     "speed": 4,
-    "jumpspeed": 11
+    "jumpspeed": 11,
+    "lifes": 1,
+    "maxLifes": 50,
+    "maxScore": 50
   },
+  "enemies": [],
   "camera": {
     "freely": true
   }

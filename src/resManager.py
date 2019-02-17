@@ -16,7 +16,8 @@ _res = {
     "sound": dict(),
     "font": dict(),
     "var": dict(),
-    "anim": dict()
+    "anim": dict(),
+    "surfaces": dict()
 }
 
 #Constants
@@ -109,3 +110,18 @@ def getSyncAnimation(idx):
 def updateSyncAnimations():
     for anim in _res["anim"].values():
         anim.update()
+        
+#Shares surfaces functions
+def createSurface(idx, size, colorKey=None):
+    _res["surfaces"][idx] = pygame.Surface(size)
+    _res["surfaces"][idx].convert()
+    _res["surfaces"][idx].set_colorkey(colorKey)
+    
+def createImgSurface(idx, img, colorKey=None):
+    _res["surfaces"][idx] = pygame.Surface(img.get_size())
+    _res["surfaces"][idx].convert()
+    _res["surfaces"][idx].set_colorkey(colorKey)
+    _res["surfaces"][idx].blit(img, (0, 0))
+    
+def getSurface(idx):
+    return _res["surfaces"][idx]

@@ -29,6 +29,7 @@ def main():
     resManager.setVar("FPS", 60)
     resManager.setVar("TITLE", "PySquarePlatform")
     resManager.setVar("SOUND", True)
+    resManager.setVar("FINISHED", False)
 
     pygame.init()
     pygame.display.set_mode(resManager.getVar("SIZE"), pygame.DOUBLEBUF)
@@ -43,7 +44,11 @@ def main():
     #Load data here
     resManager.loadImgs([
         ("bg-default", "img/bg-default.png"),
-        ("coin", "img/coin.png")
+        ("bg-dark", "img/bg-dark.png"),
+        ("coin", "img/coin.png"),
+        ("hud-heart", "img/hud-heart.png"),
+        ("hud-coin", "img/hud-coin.png"),
+        ("ground-spikes", "img/ground-spikes.png")
     ])
     resManager.loadSounds([
         ("jump", "sound/jump.ogg"),
@@ -52,19 +57,19 @@ def main():
         ("listbox_signal", "sound/listbox_signal.ogg")
     ])
     resManager.createSyncAnimation("coin", resManager.getImg("coin"), 20, 24, ticksPerFrame=5, colorKey=(255, 255, 255))
+    resManager.createImgSurface("ground-spikes", resManager.getImg("ground-spikes"), colorKey=(255, 255, 255))
     
     state = changeState(menustate.MenuState)
     
     clock = pygame.time.Clock()
     FPS = resManager.getVar("FPS")
-    finished = False
 
-    while not finished:
+    while not resManager.getVar("FINISHED"):
         while pygame.event.peek():
             e = pygame.event.poll()
             state.handle(e)
             if e.type == pygame.QUIT:
-              finished = True
+                resManager.setVar("FINISHED", True)
 
         resManager.updateSyncAnimations()
         newStateClass = state.update()

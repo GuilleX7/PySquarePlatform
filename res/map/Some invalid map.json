@@ -27,6 +27,7 @@
     "speed": 4,
     "jumpspeed": 8
   },
+  "enemies": [],
   "camera": {
     "freely": false
   }

@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 import pygame
 import resManager
 from states import state, loadstate
@@ -14,9 +16,10 @@ class MenuState(state.State):
         self.title.center()
         
         self.container = container.Container()
-        self.listbox = self.container.add("listbox1", listbox.ListBox([110, 90], 500, maxVisibleItems=10, bgColor=(150, 150, 150)))
-        self.listbox.addItem("l", "Load map", bgColor=(200, 200, 200), focusColor=(255, 255, 255))
+        self.listbox = self.container.add("listbox1", listbox.ListBox([110, 90], 500, maxVisibleItems=10, bgColor=(43, 238, 217)))
+        self.listbox.addItem("l", "Load map", bgColor=(145, 200, 145), focusColor=(200, 255, 200))
         self.listbox.addItem("s", "", bgColor=(200, 200, 200), focusColor=(255, 255, 255))
+        self.listbox.addItem("e", "Exit game", bgColor=(200, 145, 145), focusColor=(255, 200, 200))
         self.refresh()
         
         pygame.key.set_repeat(300, 100)
@@ -38,6 +41,8 @@ class MenuState(state.State):
             elif signal == "s":
                 resManager.setVar("SOUND", not resManager.getVar("SOUND"))
                 self.refresh()
+            elif signal == "e":
+                resManager.setVar("FINISHED", True)
     
     def draw(self):
         self.background.draw(self.ctx)
