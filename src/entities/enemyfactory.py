@@ -166,12 +166,10 @@ class Squared(Enemy):
     
     def draw(self, ctx, offset=(0, 0)):
         super().draw(ctx, offset)
-        self.gun.draw(ctx, offset)
         
 class SquaredGun:
     def __init__(self, enemy, shootDelay, shootDistance, shootSpeed, shootSize):
         self.enemy = enemy
-        self.bullets = []
         self.setShootDelay(shootDelay)
         self.setShootDistance(shootDistance)
         self.setShootSpeed(shootSpeed)
@@ -209,10 +207,6 @@ class SquaredGun:
             self.setShootDelay()
             if axis.getDistanceBetween(self.enemy, self.enemy.root.target) <= self.shootDistance:
                 self.shoot()
-            
-    def draw(self, ctx, offset=(0, 0)):
-        for bullet in self.bullets:
-            bullet.draw(ctx, offset)
        
 class SquaredGunBullet(pygame.Rect):
     def __init__(self, gun, shootSpeed, size=10):

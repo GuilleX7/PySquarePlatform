@@ -47,10 +47,10 @@
   },
   "enemies": [
   	{ "type": 1, "position": [4, 6], "speed": 1, "jumpSpeed": 5, "direction": 1,
-  	  "shootDelay": 0.8, "shootDistance": 400, "shootSpeed": 5, "shootSize": 5},
+  	  "shootDelay": 2, "shootDistance": 400, "shootSpeed": 5, "shootSize": 10 },
   	  
   	{ "type": 1, "position": [7, 2], "speed": 1, "jumpSpeed": 5, "direction": 1,
-  	  "shootDelay": 1.0, "shootDistance": 300, "shootSpeed": 4, "shootSize": 10 }
+  	  "shootDelay": 3, "shootDistance": 300, "shootSpeed": 4, "shootSize": 10 }
   ],
   "camera": {
     "freely": false

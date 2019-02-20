@@ -114,7 +114,7 @@ class WorldBlock:
             
         def draw(self, ctx, offset=(0, 0)):
             if self.visible:
-                super().draw(self, ctx, offset=offset)
+                super().draw(ctx, offset)
                 
     class SOLID_GROUND_SPIKES(WorldBlockBase):
         def __init__(self, pos, size):
@@ -195,7 +195,7 @@ class WorldEntities:
         elif type == WorldBlock.Types.SPECIAL_COIN:
             self.groups[WorldBlock.Groups.SPECIALS][x].append(WorldBlock.SPECIAL_COIN(realPosition, self.root.tilesize))
 
-    def updateAndDraw(self, ctx, offset=(0,0)):
+    def updateAndDraw(self, ctx, offset=(0, 0)):
         for group in self.groups:
             markeds = []
             for gridx, grid in enumerate(group):
