@@ -2,7 +2,7 @@
 
 import pygame
 import resManager
-from states import state, errorstate, loadstate, deadstate
+from states import state, errorstate, loadstate, deadstate, winstate
 from entities import player, world, enemyfactory
 
 
@@ -63,6 +63,9 @@ class MainState(state.State):
         if self.player.hasDied():
             pygame.mixer.stop()
             return deadstate.DeadState
+        elif self.player.hasWon():
+            pygame.mixer.stop()
+            return winstate.WinState
         
         self.world.camera.update()
     

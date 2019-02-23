@@ -48,7 +48,7 @@ class WorldBlock:
         
     class GroupContainers:
         SOLIDS = (1, 2, 3, 4)
-        SPECIALS = (9,)
+        SPECIALS = (9, 8)
     
     class Types:
         AIR = 0
@@ -57,6 +57,7 @@ class WorldBlock:
         SOLID_BREAKY = 3
         SOLID_INVISIBLE = 4
         SOLID_GROUND_SPIKES = 5
+        SPECIAL_FLAG = 8
         SPECIAL_COIN = 9
         
     #SOLID classes
@@ -138,6 +139,17 @@ class WorldBlock:
             ctx.blit(resManager.getSurface("ground-spikes"), self.move(offset))
  
     #SPECIAL classes
+    class SPECIAL_FLAG(WorldBlockBase):
+        def __init__(self, pos, size):
+            super().__init__(pos, size)
+            self.type = WorldBlock.Types.SPECIAL_FLAG
+            
+        def onCollisionWithPlayer(self, player, collisionSide):
+            player.win()
+                
+        def draw(self, ctx, offset=(0, 0)):
+            ctx.blit(resManager.getSurface("flag"), self.move(offset))
+            
     class SPECIAL_COIN(WorldBlockBase):
         score = 1
         
@@ -192,6 +204,8 @@ class WorldEntities:
         elif type == WorldBlock.Types.SOLID_GROUND_SPIKES:
             self.groups[WorldBlock.Groups.SOLIDS][x].append(WorldBlock.SOLID_GROUND_SPIKES(realPosition, self.root.tilesize))
         #SPECIALS
+        elif type == WorldBlock.Types.SPECIAL_FLAG:
+            self.groups[WorldBlock.Groups.SPECIALS][x].append(WorldBlock.SPECIAL_FLAG(realPosition, self.root.tilesize))
         elif type == WorldBlock.Types.SPECIAL_COIN:
             self.groups[WorldBlock.Groups.SPECIALS][x].append(WorldBlock.SPECIAL_COIN(realPosition, self.root.tilesize))
 

@@ -48,7 +48,8 @@ def main():
         ("coin", "img/coin.png"),
         ("hud-heart", "img/hud-heart.png"),
         ("hud-coin", "img/hud-coin.png"),
-        ("ground-spikes", "img/ground-spikes.png")
+        ("ground-spikes", "img/ground-spikes.png"),
+        ("flag", "img/flag.png")
     ])
     resManager.loadSounds([
         ("jump", "sound/jump.ogg"),
@@ -58,6 +59,7 @@ def main():
     ])
     resManager.createSyncAnimation("coin", resManager.getImg("coin"), 20, 24, ticksPerFrame=5, colorKey=(255, 255, 255))
     resManager.createImgSurface("ground-spikes", resManager.getImg("ground-spikes"), colorKey=(255, 255, 255))
+    resManager.createImgSurface("flag", resManager.getImg("flag"), colorKey=(0, 255, 0))
     
     state = changeState(menustate.MenuState)
     

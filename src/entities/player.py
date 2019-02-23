@@ -45,6 +45,7 @@ class Player(pygame.Rect):
         }
         
         self.died = False
+        self.won = False
         
         self.saveGhost()
         
@@ -67,9 +68,15 @@ class Player(pygame.Rect):
     def die(self):
         self.died = True
         self.lifes = 0
+        
+    def win(self):
+        self.won = True
 
     def hasDied(self):
         return self.died
+    
+    def hasWon(self):
+        return self.won
     
     def saveGhost(self):
         self.oldGhost = self.copy()
